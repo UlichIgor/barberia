@@ -97,8 +97,8 @@ export default function Booking() {
   async function submit(e) {
     e.preventDefault();
     setError('');
-    if (!dayIsOpen(date)) { setError('Запис доступний з понеділка по п’ятницю, 09:00–19:00.'); return; }
-    if (!time || !slots.includes(time)) { setError('Цей час уже недоступний. Обери інший слот.'); return; }
+    if (!dayIsOpen(date)) { setError('Las reservas están disponibles de lunes a viernes, de 09:00 a 19:00.'); return; }
+    if (!time || !slots.includes(time)) { setError('Este horario ya no está disponible. Elige otra hora.'); return; }
     const startMinutes = Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
     const booking = {
       id: Date.now(), service: item.name, serviceId: item.id, date, time, name: name.trim(), phone: phone.trim(),
@@ -114,7 +114,7 @@ export default function Booking() {
       const startsAt = madridLocalToIso(date, time);
       const endsAt = madridLocalToIso(date, fmtTime(startMinutes + item.duration));
       const { error: insertError } = await supabase.from('barber_appointments').insert({ service_id: item.id, client_name: name.trim(), client_phone: phone.trim(), starts_at: startsAt, ends_at: endsAt, status: 'pending' });
-      if (insertError) { setError(insertError.code === '23P01' ? 'Цей час щойно зайняли. Обери інший слот.' : 'Не вдалося створити запис. Перевір дані та спробуй ще раз.'); return; }
+      if (insertError) { setError(insertError.code === '23P01' ? 'Esta hora acaba de ocuparse. Elige otra.' : 'No se pudo crear la reserva. Comprueba los datos e inténtalo de nuevo.'); return; }
       setSent(true);
     } else {
       localStorage.setItem('barberia-demo-bookings', JSON.stringify([...current, booking]));
@@ -123,33 +123,33 @@ export default function Booking() {
   }
 
   return <>
-    <PageIntro eyebrow="03 / ONLINE APPOINTMENT" title="ОБЕРИ СВІЙ" accent="ЧАС." description="Обери послугу, робочий день та доступний час. Залиш контакти — майстер зможе підтвердити запит." />
+    <PageIntro eyebrow="03 / ONLINE APPOINTMENT" title="ОБЕРИ СВІЙ" accent="ЧАС." description="Elige un servicio, un día laborable y una hora disponible. Deja tus datos para que el barbero pueda confirmar la solicitud." />
     <section className="section bookingSection">
       <form className="bookingForm" onSubmit={submit}>
-        <div className="formStep"><b>01</b><div><h3>ОБЕРИ ПОСЛУГУ</h3><div className="bookingServices">{services.map(s =>
+        <div className="formStep"><b>01</b><div><h3>ELIGE UN SERVICIO</h3><div className="bookingServices">{services.map(s =>
           <button type="button" key={s.id} className={service === s.id ? 'chosen' : ''} onClick={() => { setService(s.id); setTime(''); setSent(false); setError(''); }}>
             <span>{s.name}</span><strong>{s.price} €</strong><small>{s.duration} хв</small>
           </button>)}</div></div></div>
-        <div className="formStep"><b>02</b><div><h3><CalendarDays size={15} />　ОБЕРИ ДАТУ</h3>
+        <div className="formStep"><b>02</b><div><h3><CalendarDays size={15} />　ELIGE UNA FECHA</h3>
           <input className="field" type="date" min={minDate} value={date} required onChange={e => { setDate(e.target.value); setTime(''); setSent(false); setError(''); }} />
-          <p className="hint">Графік майстра: понеділок — п’ятниця, 09:00–19:00. Субота та неділя — вихідні.</p>
-          {date && !dayIsOpen(date) && <p className="formError">У цей день майстер не приймає. Обери дату з понеділка по п’ятницю.</p>}
+          <p className="hint">Horario del barbero: de lunes a viernes, de 09:00 a 19:00. Sábados y domingos cerrado.</p>
+          {date && !dayIsOpen(date) && <p className="formError">El barbero no atiende este día. Elige una fecha de lunes a viernes.</p>}
         </div></div>
-        <div className="formStep"><b>03</b><div><h3>ДОСТУПНИЙ ЧАС</h3>
+        <div className="formStep"><b>03</b><div><h3>HORARIOS DISPONIBLES</h3>
           <div className="timeSlots">{slots.map(t => <button type="button" key={t} className={time === t ? 'chosen' : ''} onClick={() => { setTime(t); setSent(false); setError(''); }}>{t}</button>)}</div>
-          {availabilityLoading && <p className="hint">Перевіряємо вільний час…</p>}
-          {date && dayIsOpen(date) && !availabilityLoading && slots.length === 0 && <p className="hint">На цю дату немає доступних слотів для обраної послуги.</p>}
-          <p className="hint">Крок між початками запису — 30 хвилин. Тривалість послуги враховується при перевірці перетинів.</p>
+          {availabilityLoading && <p className="hint">Comprobando disponibilidad…</p>}
+          {date && dayIsOpen(date) && !availabilityLoading && slots.length === 0 && <p className="hint">No hay horarios disponibles para el servicio seleccionado en esta fecha.</p>}
+          <p className="hint">Los horarios de inicio están separados por 30 minutos. La duración del servicio se tiene en cuenta al comprobar la disponibilidad.</p>
         </div></div>
-        <div className="formStep"><b>04</b><div><h3>ТВОЇ КОНТАКТИ</h3><div className="contactGrid">
-          <label>ІМ'Я<input className="field" value={name} onChange={e => setName(e.target.value)} placeholder="Твоє ім'я" required minLength={2} /></label>
-          <label>ТЕЛЕФОН<input className="field" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+380 __ ___ __ __" required /></label>
-        </div><label className="consent"><input type="checkbox" required /> Погоджуюсь на використання контактів для зв'язку щодо запису.</label></div></div>
-        <div className="submitRow"><div><small>ОБРАНА ПОСЛУГА</small><strong>{item.name}</strong><span><Clock3 size={13} /> {item.duration} хв · {item.price} €</span></div>
-          <button className="btn goldBtn" disabled={sent || !time || availabilityLoading}>{sent ? <><Check size={15} /> ЗАПИТ СТВОРЕНО</> : 'НАДІСЛАТИ ЗАПИТ ↗'}</button>
+        <div className="formStep"><b>04</b><div><h3>TUS DATOS DE CONTACTO</h3><div className="contactGrid">
+          <label>NOMBRE<input className="field" value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre" required minLength={2} /></label>
+          <label>TELÉFONO<input className="field" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+34 ___ ___ ___" required /></label>
+        </div><label className="consent"><input type="checkbox" required /> Acepto que se utilicen mis datos de contacto para gestionar la cita.</label></div></div>
+        <div className="submitRow"><div><small>SERVICIO SELECCIONADO</small><strong>{item.name}</strong><span><Clock3 size={13} /> {item.duration} хв · {item.price} €</span></div>
+          <button className="btn goldBtn" disabled={sent || !time || availabilityLoading}>{sent ? <><Check size={15} /> SOLICITUD ENVIADA</> : 'ENVIAR SOLICITUD ↗'}</button>
         </div>
         {error && <p className="formError">{error}</p>}
-        {sent && <p className="successMsg">Запит на запис надіслано майстру. Він з'явиться в адміністративній панелі YARO зі статусом «Очікує підтвердження».</p>}
+        {sent && <p className="successMsg">Tu solicitud de cita se ha enviado al barbero. Aparecerá en el panel de YARO con el estado «Pendiente de confirmación».</p>}
       </form>
     </section>
   </>;
