@@ -16,11 +16,11 @@ const localDate = (d) => {
 const minDate = localDate(today);
 const fmtTime = (minutes) => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd && bStart < aEnd;
-function madridLocalToIso(date, time) {
+function kyivLocalToIso(date, time) {
   const [year, month, day] = date.split('-').map(Number);
   const [hour, minute] = time.split(':').map(Number);
   const target = Date.UTC(year, month - 1, day, hour, minute);
-  const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Kyiv', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   let guess = target;
   for (let i = 0; i < 3; i++) {
     const parts = Object.fromEntries(formatter.formatToParts(new Date(guess)).filter(p => p.type !== 'literal').map(p => [p.type, Number(p.value)]));
@@ -29,8 +29,8 @@ function madridLocalToIso(date, time) {
   }
   return new Date(guess).toISOString();
 }
-function madridDateTime(iso) {
-  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso));
+function kyivDateTime(iso) {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Kyiv', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso));
   const p = Object.fromEntries(parts.filter(x => x.type !== 'literal').map(x => [x.type, x.value]));
   return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
 }
@@ -65,12 +65,16 @@ export default function Booking() {
     });
     if (date) {
       setAvailabilityLoading(true);
-      const start = madridLocalToIso(date, '00:00');
+      const start = kyivLocalToIso(date, '00:00');
       const nextDate = new Date(`${date}T12:00:00`); nextDate.setDate(nextDate.getDate() + 1);
       const next = `${nextDate.getFullYear()}-${String(nextDate.getMonth()+1).padStart(2,'0')}-${String(nextDate.getDate()).padStart(2,'0')}`;
-      const end = madridLocalToIso(next, '00:00');
-      supabase.rpc('get_barber_busy_slots', { p_day_start: start, p_day_end: end }).then(({ data }) => {
-        if (active) { setBookings((data || []).map(row => { const a = madridDateTime(row.starts_at); const b = madridDateTime(row.ends_at); const startMinutes = Number(a.time.slice(0,2))*60 + Number(a.time.slice(3,5)); const endMinutes = Number(b.time.slice(0,2))*60 + Number(b.time.slice(3,5)); return { date: a.date, time: a.time, status: 'confirmed', startMinutes, endMinutes, duration: endMinutes-startMinutes }; })); setAvailabilityLoading(false); }
+      const end = kyivLocalToIso(next, '00:00');
+      supabase.from('barber_appointments').select('starts_at,ends_at').lt('starts_at', end).gt('ends_at', start).in('status', ['pending', 'confirmed']).then(({ data, error: availabilityError }) => {
+        if (active) {
+          if (availabilityError) setError('No se pudo comprobar la disponibilidad. Actualiza la página e inténtalo de nuevo.');
+          setBookings((data || []).map(row => { const a = kyivDateTime(row.starts_at); const b = kyivDateTime(row.ends_at); const startMinutes = Number(a.time.slice(0,2))*60 + Number(a.time.slice(3,5)); const endMinutes = Number(b.time.slice(0,2))*60 + Number(b.time.slice(3,5)); return { date: a.date, time: a.time, status: 'confirmed', startMinutes, endMinutes, duration: endMinutes-startMinutes }; }));
+          setAvailabilityLoading(false);
+        }
       });
     } else { setBookings([]); setAvailabilityLoading(false); }
     return () => { active = false; };
@@ -111,8 +115,8 @@ export default function Booking() {
         Number(b.startMinutes ?? 0), Number(b.endMinutes ?? ((b.startMinutes ?? 0) + (b.duration || 30)))));
     if (conflict) { setError('Lo sentimos, esta hora acaba de ocuparse. Actualiza tu selección.'); setTime(''); return; }
     if (isSupabaseConfigured) {
-      const startsAt = madridLocalToIso(date, time);
-      const endsAt = madridLocalToIso(date, fmtTime(startMinutes + item.duration));
+      const startsAt = kyivLocalToIso(date, time);
+      const endsAt = kyivLocalToIso(date, fmtTime(startMinutes + item.duration));
       const { error: insertError } = await supabase.from('barber_appointments').insert({ service_id: item.id, client_name: name.trim(), client_phone: phone.trim(), starts_at: startsAt, ends_at: endsAt, status: 'pending' });
       if (insertError) { setError(insertError.code === '23P01' ? 'Esta hora acaba de ocuparse. Elige otra.' : 'No se pudo crear la reserva. Comprueba los datos e inténtalo de nuevo.'); return; }
       setSent(true);
