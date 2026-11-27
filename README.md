@@ -1,36 +1,80 @@
 # BARBERIA — YARO BARBER
 
-Sitio web de barbería desarrollado con React, Vite, React Router, HTML5 y CSS3. Incluye Inicio, Servicios, Sobre mí y Reservas, además del panel privado de administración.
+Адаптивний сайт барбершопу YARO, створений на React, Vite, React Router, HTML5 та CSS3. Проєкт містить головну сторінку, послуги, сторінку майстра, онлайн-запис і захищену адміністративну панель.
 
-## Desarrollo local
+## Технології
+
+- React та Vite
+- React Router
+- HTML5 та CSS3
+- Supabase Auth, PostgreSQL, RLS та Storage
+- GitHub Actions і GitHub Pages
+
+## Запуск локально
+
 ```bash
 npm install
 npm run dev
 ```
-Compilar para producción: `npm run build`.
 
-## Horario actual
-De lunes a viernes, de 09:00 a 19:00. Sábados y domingos cerrado. Los horarios de inicio de las citas avanzan en intervalos de 30 minutos.
+Збірка для production:
 
-## Servicios y precios
-El catálogo y los precios de `src/data/services.js` se basan en la ficha de Barbershop Yaro en Booksy y se muestran en euros. Comprueba la ficha de Booksy antes de publicar cambios de precios.
+```bash
+npm run build
+npm run preview
+```
 
-## Galería
-La página «Sobre mí» muestra fotografías de cortes de pelo en una galería adaptable con ampliación de imágenes. El barbero puede gestionar nuevas imágenes desde el panel de administración.
+## Графік роботи
 
-## Backend
-Se necesita un backend independiente de Supabase para gestionar reservas, servicios, galería y opiniones. Configura el archivo `.env` usando `.env.example` después de crear el proyecto BARBERIA. Sin estas variables, la página de reservas funciona en modo de demostración local y el panel muestra las instrucciones de configuración.
+- Понеділок–п’ятниця: 09:00–19:00
+- Субота та неділя: вихідні
+- Інтервал початку записів: 30 хвилин
 
-## Opiniones
-Los visitantes pueden enviar opiniones. Estas quedan en estado `pending` hasta que el barbero las revise y publique desde `/#/admin`.
+Тривалість вибраної послуги враховується під час перевірки доступності часу.
 
-## Panel de administración
-- Acceso: `https://ulichigor.github.io/BARBERIA/#/admin`.
-- Gestión de reservas y estados, precios y duración de servicios, fotografías de la galería y moderación de opiniones.
-- La autorización se basa en el atributo seguro `app_metadata.role = admin` de Supabase Auth.
-- Aplica las migraciones SQL en el orden indicado en `ADMIN-SETUP.md`.
+## Адаптивність
 
-## Publicación en GitHub Pages
-El repositorio se publica desde `main` mediante GitHub Actions. La aplicación usa la ruta base `/BARBERIA/` y rutas hash para que la navegación funcione correctamente en GitHub Pages.
+Інтерфейс адаптується до широких моніторів, ноутбуків, планшетів і смартфонів. Використовуються гнучкі сітки, відносні розміри, адаптивна типографіка та окремі правила для вузьких екранів. Таблиці адміністративної панелі на малих екранах прокручуються горизонтально всередині власного контейнера, не розширюючи сторінку.
 
-En GitHub → Settings → Secrets and variables → Actions, añade los secretos `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. No incluyas nunca una clave `service_role` ni claves secretas en el frontend.
+## Послуги та ціни
+
+Каталог послуг розташований у `src/data/services.js`. Після налаштування Supabase активні послуги та ціни завантажуються з таблиці `barber_services`. Перед публікацією змін перевіряйте актуальність цін у профілі Barbershop Yaro на Booksy.
+
+## Галерея та відгуки
+
+Сторінка «Про майстра» містить портфоліо, перегляд фотографій у повному розмірі та форму відгуків. Нові роботи, публікація/приховування фотографій і модерація відгуків доступні адміністратору.
+
+## Supabase
+
+Для повноцінної роботи потрібен окремий Supabase-проєкт **BARBERIA**. Не використовуйте проєкти Delivery або Kitchen-shop.
+
+Налаштуйте змінні середовища за прикладом у `.env.example`:
+
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Без цих змінних форма запису працює в демонстраційному локальному режимі, а адміністративна панель покаже інструкцію підключення.
+
+## Адміністративна панель YARO
+
+- URL на GitHub Pages: [https://ulichigor.github.io/BARBERIA/#/admin](https://ulichigor.github.io/BARBERIA/#/admin)
+- Інструкція з налаштування: [ADMIN-SETUP.md](./ADMIN-SETUP.md)
+- Керування записами та їхніми статусами.
+- Додавання й редагування послуг, цін і тривалості.
+- Завантаження, публікація, приховування та видалення фотографій.
+- Модерація відгуків.
+
+Права адміністратора перевіряються за захищеним атрибутом `app_metadata.role = admin` у Supabase Auth.
+
+## Публікація на GitHub Pages
+
+Репозиторій публікується з гілки `main) за допомогою GitHub Actions. Для GitHub Pages налаштовано базовий шлях `/BARBERIA/` та hash-маршрутизацію.
+
+У GitHub відкрийте **Settings → Secrets and variables → Actions** та додайте секрети:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Ніколи не додавайте ключ `service_role` або інші секретні ключі до клієнтського React-коду.
