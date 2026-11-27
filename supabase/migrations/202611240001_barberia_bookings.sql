@@ -1,6 +1,8 @@
 -- BARBERIA booking schema
 -- Apply only to a dedicated BARBERIA Supabase project, never to Kitchen-shop/Delivery.
+create schema if not exists extensions;
 create extension if not exists btree_gist;
+alter extension btree_gist set schema extensions;
 
 create table if not exists public.barber_services (
   id text primary key,
