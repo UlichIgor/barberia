@@ -19,30 +19,65 @@ const statusLabels = { pending: 'Очікує підтвердження', confi
 const money = (value) => `${Number(value || 0).toFixed(2).replace(/\.00$/, '')} €`;
 const dateTime = (value) => new Date(value).toLocaleString('uk-UA', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Kyiv' });
 
-function Login({ onLogin }) {
-  const [email, setEmail] = useState('');
+function Login({ onLogin, recoveryMode, onRecoveryComplete }) {
+  const [email, setEmail] = useState('ulichigor55@gmail.com');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [showRecovery, setShowRecovery] = useState(false);
+
   async function submit(event) {
-    event.preventDefault(); setBusy(true); setError('');
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) { setError('Не вдалося увійти. Перевірте електронну пошту та пароль.'); setBusy(false); return; }
+    event.preventDefault(); setBusy(true); setError(''); setMessage('');
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (authError) { setError('Неправильна електронна пошта або пароль. Якщо пароль забуто — скористайтеся відновленням нижче.'); setBusy(false); return; }
     if (data.user?.app_metadata?.role !== 'admin') {
       await supabase.auth.signOut(); setError('Цей обліковий запис не має прав адміністратора.'); setBusy(false); return;
     }
     onLogin(data.user); setBusy(false);
   }
+
+  async function sendRecovery(event) {
+    event.preventDefault(); setBusy(true); setError(''); setMessage('');
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}#/admin`;
+    const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+    if (recoveryError) setError(recoveryError.message);
+    else setMessage('Якщо для цієї адреси існує обліковий запис, лист із посиланням для зміни пароля надіслано. Перевірте також папку «Спам».');
+    setBusy(false);
+  }
+
+  async function updatePassword(event) {
+    event.preventDefault(); setBusy(true); setError(''); setMessage('');
+    if (password.length < 8) { setError('Новий пароль має містити щонайменше 8 символів.'); setBusy(false); return; }
+    if (password !== confirmPassword) { setError('Паролі не збігаються.'); setBusy(false); return; }
+    const { data, error: updateError } = await supabase.auth.updateUser({ password });
+    if (updateError) setError(updateError.message);
+    else { setMessage('Пароль успішно змінено. Тепер можна увійти до панелі.'); setPassword(''); setConfirmPassword(''); onRecoveryComplete(data.user); }
+    setBusy(false);
+  }
+
   return <div className="adminLogin"><div className="adminLoginCard">
     <img src={`${import.meta.env.BASE_URL}images/yaro-logo.webp`} alt="YARO Barberia"/>
-    <p className="adminEyebrow">YARO BARBERIA · CONTROL PANEL</p><h1>ВХІД ДО <em>ПАНЕЛІ.</em></h1>
-    <p className="adminMuted">Доступ дозволено лише майстру.</p>
-    <form onSubmit={submit}>
+    <p className="adminEyebrow">YARO BARBERIA · CONTROL PANEL</p><h1>{recoveryMode ? <>НОВИЙ <em>ПАРОЛЬ.</em></> : showRecovery ? <>ВІДНОВЛЕННЯ <em>ДОСТУПУ.</em></> : <>ВХІД ДО <em>ПАНЕЛІ.</em></>}</h1>
+    <p className="adminMuted">{recoveryMode ? 'Створіть новий пароль для облікового запису майстра.' : 'Доступ дозволено лише майстру.'}</p>
+    {recoveryMode ? <form onSubmit={updatePassword}>
+      <label>НОВИЙ ПАРОЛЬ<input type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={8} required autoComplete="new-password"/></label>
+      <label>ПОВТОРІТЬ НОВИЙ ПАРОЛЬ<input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} minLength={8} required autoComplete="new-password"/></label>
+      {error && <p className="adminError">{error}</p>}{message && <p className="adminMuted">{message}</p>}
+      <button className="adminPrimary" disabled={busy}>{busy ? 'ЗБЕРЕЖЕННЯ…' : 'ЗМІНИТИ ПАРОЛЬ'}</button>
+    </form> : showRecovery ? <form onSubmit={sendRecovery}>
+      <label>ЕЛЕКТРОННА ПОШТА<input type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email"/></label>
+      {error && <p className="adminError">{error}</p>}{message && <p className="adminMuted">{message}</p>}
+      <button className="adminPrimary" disabled={busy}>{busy ? 'НАДСИЛАННЯ…' : 'НАДІСЛАТИ ПОСИЛАННЯ'}</button>
+      <button type="button" className="adminTextButton" onClick={() => { setShowRecovery(false); setError(''); setMessage(''); }}>← Повернутися до входу</button>
+    </form> : <form onSubmit={submit}>
       <label>ЕЛЕКТРОННА ПОШТА<input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="master@example.com" required autoComplete="username"/></label>
       <label>ПАРОЛЬ<input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••••" required autoComplete="current-password"/></label>
       {error && <p className="adminError">{error}</p>}
       <button className="adminPrimary" disabled={busy}>{busy ? 'ВХІД…' : <><LockKeyhole size={16}/> УВІЙТИ ДО ПАНЕЛІ</>}</button>
-    </form>
+      <button type="button" className="adminTextButton" onClick={() => { setShowRecovery(true); setError(''); setMessage(''); }}>Забули пароль?</button>
+    </form>}
     <span className="adminLoginFoot">ЗАХИЩЕНИЙ ДОСТУП · YARO</span>
   </div></div>;
 }
@@ -50,6 +85,7 @@ function Login({ onLogin }) {
 export default function Admin() {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(false);
   const [section, setSection] = useState('overview');
   const [mobileNav, setMobileNav] = useState(false);
   const [appointments, setAppointments] = useState([]);
@@ -73,8 +109,10 @@ export default function Admin() {
       else if (current) supabase.auth.signOut();
       setAuthReady(true);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       const current = session?.user;
+      if (event === 'PASSWORD_RECOVERY') setRecoveryMode(true);
+      if (event === 'USER_UPDATED') setRecoveryMode(false);
       setUser(current?.app_metadata?.role === 'admin' ? current : null);
       setAuthReady(true);
     });
@@ -156,7 +194,7 @@ export default function Admin() {
 
   if (!isSupabaseConfigured) return <div className="adminSetup"><LockKeyhole size={35}/><p className="adminEyebrow">YARO · ADMIN SETUP</p><h1>ПІДКЛЮЧИМО <em>БАЗУ ДАНИХ.</em></h1><p>Адміністративна панель підготовлена для Supabase, але змінні VITE_SUPABASE_URL та VITE_SUPABASE_PUBLISHABLE_KEY ще не налаштовані. Створіть окремий проєкт Supabase з назвою BARBERIA та застосуйте SQL-міграції.</p></div>;
   if (!authReady) return <div className="adminLoading"><RefreshCw className="spin"/> Завантаження панелі…</div>;
-  if (!user) return <Login onLogin={setUser}/>;
+  if (!user) return <Login onLogin={setUser} recoveryMode={recoveryMode} onRecoveryComplete={() => setRecoveryMode(false)}/>;
 
   const filteredAppointments = appointments.filter(a => (statusFilter === 'all' || a.status === statusFilter) && `${a.client_name} ${a.client_phone} ${a.barber_services?.name || ''}`.toLowerCase().includes(search.toLowerCase()));
   const visibleReviews = reviews.filter(r => reviewFilter === 'all' || r.status === reviewFilter);
