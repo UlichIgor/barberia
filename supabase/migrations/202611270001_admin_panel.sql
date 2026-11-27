@@ -107,20 +107,14 @@ create policy "YARO admins list portfolio images" on storage.objects
 
 -- Add explicit public insert grant for review form, while appointment data remains private.
 
--- Return only busy time intervals for a single local-day window. This deliberately
--- excludes client names, phone numbers and service details from the public API.
-create or replace function public.get_barber_busy_slots(p_day_start timestamptz, p_day_end timestamptz)
-returns table (starts_at timestamptz, ends_at timestamptz)
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select a.starts_at, a.ends_at
-  from public.barber_appointments as a
-  where a.starts_at < p_day_end
-    and a.ends_at > p_day_start
-    and a.status in ('pending', 'confirmed');
-$$;
-revoke all on function public.get_barber_busy_slots(timestamptz, timestamptz) from public;
-grant execute on function public.get_barber_busy_slots(timestamptz, timestamptz) to anon, authenticated;
+-- Public availability exposes only occupied time intervals, never client identity.
+drop function if exists public.get_barber_busy_slots(timestamptz, timestamptz);
+drop policy if exists "Visitors can read busy appointment intervals" on public.barber_appointments;
+create policy "Visitors can read busy appointment intervals"
+  on public.barber_appointments for select to anon
+  using (status in ('pending','confirmed'));
+revoke all on public.barber_appointments from anon;
+grant insert on public.barber_appointments to anon;
+grant select (starts_at, ends_at) on public.barber_appointments to anon;
+create index if not exists barber_appointments_service_id_idx
+  on public.barber_appointments(service_id);
