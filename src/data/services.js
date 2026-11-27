@@ -1,14 +1,14 @@
 export const services = [
-{id:'cut',name:'Чоловіча стрижка',sourceName:'Corte caballero',description:'Класична чоловіча стрижка.',duration:30,price:20},
-{id:'beard-trim',name:'Корекція бороди',sourceName:'Recorte de la barba',description:'Охайна форма та контури бороди.',duration:30,price:15},
-{id:'shave-head',name:'Стрижка машинкою',sourceName:'Rapado',description:'Коротка стрижка машинкою.',duration:15,price:15},
-{id:'modern',name:'Сучасна стрижка',sourceName:'Corte Moderno',description:'Сучасний індивідуальний стиль.',duration:40,price:25},
-{id:'beard-shave',name:'Гоління бороди',sourceName:'Afeitado De Barba',description:'Традиційне гоління бороди.',duration:30,price:20},
-{id:'senior',name:'Стрижка пенсіонера',sourceName:'Corte Jubilado',description:'Чоловіча стрижка для пенсіонерів.',duration:30,price:15},
-{id:'fade',name:'Fade',sourceName:'Corte Fade',description:'Чіткий перехід та чисті контури.',duration:30,price:20},
-{id:'beard-care',name:'Догляд за бородою',sourceName:'Cuidado de la Barba',description:'Догляд та оформлення бороди.',duration:30,price:15},
-{id:'combo',name:'Стрижка + борода',sourceName:'Corte Pelo + Barba',description:'Комплексна стрижка та оформлення бороди.',duration:60,price:30},
-{id:'kid',name:'Дитяча стрижка до 8 років',sourceName:'Corte Niño Hasta 8 Años',description:'Стрижка для дітей віком до 8 років.',duration:30,price:15},
-{id:'zero',name:'Стрижка під нуль',sourceName:'Corte a Zero',description:'Стрижка під нуль.',duration:15,price:10},
-{id:'nose-wax',name:'Віск для носа',sourceName:'Waxing nariz',description:'Видалення волосся воском у носі.',duration:5,price:5}
+{id:'cut',name:'Corte de caballero',sourceName:'Corte caballero',description:'Corte clásico de caballero.',duration:30,price:20},
+{id:'beard-trim',name:'Arreglo de barba',sourceName:'Recorte de la barba',description:'Perfilado y contornos definidos de la barba.',duration:30,price:15},
+{id:'shave-head',name:'Corte a máquina',sourceName:'Rapado',description:'Corte corto a máquina.',duration:15,price:15},
+{id:'modern',name:'Corte moderno',sourceName:'Corte Moderno',description:'Un estilo moderno y personalizado.',duration:40,price:25},
+{id:'beard-shave',name:'Afeitado de barba',sourceName:'Afeitado De Barba',description:'Afeitado tradicional de barba.',duration:30,price:20},
+{id:'senior',name:'Corte para jubilados',sourceName:'Corte Jubilado',description:'Corte de caballero для пенсіонерів.',duration:30,price:15},
+{id:'fade',name:'Fade',sourceName:'Corte Fade',description:'Degradado definido y contornos limpios.',duration:30,price:20},
+{id:'beard-care',name:'Cuidado de barba',sourceName:'Cuidado de la Barba',description:'Cuidado y arreglo de barba.',duration:30,price:15},
+{id:'combo',name:'Corte + barba',sourceName:'Corte Pelo + Barba',description:'Corte de pelo y arreglo de barba.',duration:60,price:30},
+{id:'kid',name:'Corte infantil hasta 8 años',sourceName:'Corte Niño Hasta 8 Años',description:'Corte para niños de hasta 8 años.',duration:30,price:15},
+{id:'zero',name:'Afeitado al cero',sourceName:'Corte a Zero',description:'Afeitado al cero.',duration:15,price:10},
+{id:'nose-wax',name:'Віск для носа',sourceName:'Waxing nariz',description:'Depilación con cera de la nariz.',duration:5,price:5}
 ];
