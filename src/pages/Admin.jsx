@@ -194,7 +194,7 @@ export default function Admin() {
 
   if (!isSupabaseConfigured) return <div className="adminSetup"><LockKeyhole size={35}/><p className="adminEyebrow">YARO · ADMIN SETUP</p><h1>ПІДКЛЮЧИМО <em>БАЗУ ДАНИХ.</em></h1><p>Адміністративна панель підготовлена для Supabase, але змінні VITE_SUPABASE_URL та VITE_SUPABASE_PUBLISHABLE_KEY ще не налаштовані. Створіть окремий проєкт Supabase з назвою BARBERIA та застосуйте SQL-міграції.</p></div>;
   if (!authReady) return <div className="adminLoading"><RefreshCw className="spin"/> Завантаження панелі…</div>;
-  if (!user) return <Login onLogin={setUser} recoveryMode={recoveryMode} onRecoveryComplete={() => setRecoveryMode(false)}/>;
+  if (!user || recoveryMode) return <Login onLogin={setUser} recoveryMode={recoveryMode} onRecoveryComplete={() => setRecoveryMode(false)}/>;
 
   const filteredAppointments = appointments.filter(a => (statusFilter === 'all' || a.status === statusFilter) && `${a.client_name} ${a.client_phone} ${a.barber_services?.name || ''}`.toLowerCase().includes(search.toLowerCase()));
   const visibleReviews = reviews.filter(r => reviewFilter === 'all' || r.status === reviewFilter);
