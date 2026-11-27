@@ -109,7 +109,7 @@ export default function Booking() {
     const conflict = current.some((b) => b.date === date && b.status !== 'cancelled' &&
       overlaps(startMinutes, startMinutes + item.duration,
         Number(b.startMinutes ?? 0), Number(b.endMinutes ?? ((b.startMinutes ?? 0) + (b.duration || 30)))));
-    if (conflict) { setError('На жаль, цей час щойно зайняли. Онови вибір.'); setTime(''); return; }
+    if (conflict) { setError('Lo sentimos, esta hora acaba de ocuparse. Actualiza tu selección.'); setTime(''); return; }
     if (isSupabaseConfigured) {
       const startsAt = madridLocalToIso(date, time);
       const endsAt = madridLocalToIso(date, fmtTime(startMinutes + item.duration));
@@ -123,12 +123,12 @@ export default function Booking() {
   }
 
   return <>
-    <PageIntro eyebrow="03 / ONLINE APPOINTMENT" title="ОБЕРИ СВІЙ" accent="ЧАС." description="Elige un servicio, un día laborable y una hora disponible. Deja tus datos para que el barbero pueda confirmar la solicitud." />
+    <PageIntro eyebrow="03 / ONLINE APPOINTMENT" title="ELIGE TU" accent="HORARIO." description="Elige un servicio, un día laborable y una hora disponible. Deja tus datos para que el barbero pueda confirmar la solicitud." />
     <section className="section bookingSection">
       <form className="bookingForm" onSubmit={submit}>
         <div className="formStep"><b>01</b><div><h3>ELIGE UN SERVICIO</h3><div className="bookingServices">{services.map(s =>
           <button type="button" key={s.id} className={service === s.id ? 'chosen' : ''} onClick={() => { setService(s.id); setTime(''); setSent(false); setError(''); }}>
-            <span>{s.name}</span><strong>{s.price} €</strong><small>{s.duration} хв</small>
+            <span>{s.name}</span><strong>{s.price} €</strong><small>{s.duration} min</small>
           </button>)}</div></div></div>
         <div className="formStep"><b>02</b><div><h3><CalendarDays size={15} />　ELIGE UNA FECHA</h3>
           <input className="field" type="date" min={minDate} value={date} required onChange={e => { setDate(e.target.value); setTime(''); setSent(false); setError(''); }} />
@@ -145,7 +145,7 @@ export default function Booking() {
           <label>NOMBRE<input className="field" value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre" required minLength={2} /></label>
           <label>TELÉFONO<input className="field" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+34 ___ ___ ___" required /></label>
         </div><label className="consent"><input type="checkbox" required /> Acepto que se utilicen mis datos de contacto para gestionar la cita.</label></div></div>
-        <div className="submitRow"><div><small>SERVICIO SELECCIONADO</small><strong>{item.name}</strong><span><Clock3 size={13} /> {item.duration} хв · {item.price} €</span></div>
+        <div className="submitRow"><div><small>SERVICIO SELECCIONADO</small><strong>{item.name}</strong><span><Clock3 size={13} /> {item.duration} min · {item.price} €</span></div>
           <button className="btn goldBtn" disabled={sent || !time || availabilityLoading}>{sent ? <><Check size={15} /> SOLICITUD ENVIADA</> : 'ENVIAR SOLICITUD ↗'}</button>
         </div>
         {error && <p className="formError">{error}</p>}
