@@ -1,0 +1,1 @@
+export default function PageIntro({eyebrow,title,accent,description}){return <section className="pageIntro"><p className="eyebrow">{eyebrow}</p><h1>{title}<br/><em>{accent}</em></h1><p>{description}</p></section>}
