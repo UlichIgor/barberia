@@ -91,3 +91,107 @@
 @media(max-width:1050px){.adminSidebar{width:220px}.adminStats{grid-template-columns:repeat(2,1fr)}.adminWorkGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.adminSidebar{position:fixed;left:-270px;top:0;transition:left .25s;width:255px;box-shadow:15px 0 50px #0008}.adminSidebar.isOpen{left:0}.adminMobileMenu{display:block;margin-right:12px}.adminTopbar{padding:0 5%;height:78px;justify-content:flex-start}.adminTopbar>div:nth-child(2){flex:1}.adminTopbar h1{font-size:21px}.adminTopActions{gap:10px}.adminLive{display:none}.adminContent{padding:25px 5% 50px}.adminWelcome{display:block}.welcomeDate{margin-top:15px}.adminQuickGrid{grid-template-columns:1fr}.adminWorkGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.adminUploadForm{align-items:stretch;flex-direction:column}.adminUploadForm>input{max-width:none}.adminFilePick{min-height:65px}.adminServiceRow{gap:8px;flex-wrap:wrap}.adminServiceInfo{min-width:calc(100% - 60px)}.adminServicePrice{margin-left:46px}.adminPanel{padding:16px}.adminToolbar{flex-direction:column}.adminSearch{min-height:42px;max-width:none}.adminToolbar select{min-height:40px}.adminStats{gap:9px}.adminStat{padding:15px;min-height:118px}.adminStat strong{font-size:24px}}
 @media(max-width:420px){.adminStats{grid-template-columns:1fr 1fr}.adminStat small{font-size:9px;min-height:24px}.adminTopActions>button{display:none}.adminFormCols{grid-template-columns:1fr}.adminLoginCard{padding:28px 20px}}
+
+
+/* Fluid responsive layout refinements — desktop, tablet and mobile */
+html,body,#root{width:100%;min-width:0;max-width:100%}
+body{overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+button,a,input,select,textarea{min-width:0}
+.section,.pageIntro,.portfolioNotice,.reviewsSection{width:100%}
+.cards,.workGallery,.adminStats,.adminQuickGrid,.adminWorkGrid{min-width:0}
+.serviceCard,.adminPanel,.adminStat,.adminQuick,.adminReviewCard,.adminWorkCard{min-width:0;overflow-wrap:anywhere}
+@media(max-width:1100px){
+ .section{padding-left:6%;padding-right:6%}
+ .aboutPage{gap:5%}
+ .adminContent{padding-left:3.5%;padding-right:3.5%}
+ .adminSidebar{width:230px}
+ .adminTable{min-width:680px}
+}
+@media(max-width:900px){
+ .header{padding-left:4%;padding-right:4%}
+ .nav{gap:14px}
+ .sectionHead{gap:24px}
+ .aboutPagePhoto.aboutPortrait{min-height:520px}
+ .reviewsLayout{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px}
+ .adminSidebar{width:220px}
+ .adminTopbar{padding-left:3%;padding-right:3%}
+ .adminStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .adminWorkGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+ .header{height:70px}
+ .brandLogo{width:44px;height:44px}
+ .brand>span{font-size:18px}
+ .social{margin-right:12px}
+ .hero{width:100%;min-height:680px;height:88svh;padding-left:6%;padding-right:6%}
+ .hero h1{font-size:clamp(48px,12vw,72px)}
+ .lead br{display:none}
+ .section{padding:62px 6%}
+ .sectionHead{display:block}
+ .sectionHead>p{max-width:100%}
+ .cards{grid-template-columns:minmax(0,1fr)}
+ .serviceCard{padding:23px}
+ .homeAbout{grid-template-columns:minmax(0,1fr)}
+ .homeAbout>div:last-child{padding:48px 7%}
+ .pageIntro{min-height:360px;padding:125px 6% 45px}
+ .pageIntro h1{font-size:clamp(44px,11vw,60px);overflow-wrap:anywhere}
+ .aboutPage{grid-template-columns:minmax(0,1fr);gap:28px;padding:42px 6%}
+ .aboutPagePhoto.aboutPortrait{min-height:clamp(350px,110vw,500px)}
+ .workGallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .portfolioNotice,.reviewsSection{padding:55px 6%}
+ .reviewsLayout{grid-template-columns:minmax(0,1fr)}
+ .reviewForm{padding:20px}
+ .bookingForm{padding:12px}
+ .formStep{grid-template-columns:27px minmax(0,1fr);gap:8px}
+ .bookingServices{grid-template-columns:minmax(0,1fr)}
+ .contactGrid{grid-template-columns:minmax(0,1fr)}
+ .submitRow{align-items:stretch;flex-direction:column}
+ .submitRow .btn{width:100%}
+ .footer{gap:12px;padding:25px 6%}
+ .adminTopbar{height:auto;min-height:72px;padding:12px 4%;gap:8px}
+ .adminTopbar h1{font-size:19px}
+ .adminTopActions{margin-left:auto}
+ .adminContent{padding:20px 4% 42px}
+ .adminWelcome{align-items:flex-start}
+ .adminPanel{padding:14px}
+ .adminPanelHead{align-items:flex-start;flex-wrap:wrap}
+ .adminPanelHead h3{font-size:18px}
+ .adminToolbar{flex-direction:column}
+ .adminSearch{width:100%;max-width:none}
+ .adminToolbar select{width:100%;min-height:42px}
+ .adminServiceRow{flex-wrap:wrap}
+ .adminServiceInfo{flex:1 1 calc(100% - 54px);min-width:0}
+ .adminServicePrice{margin-left:46px}
+ .adminUploadForm{display:grid;grid-template-columns:minmax(0,1fr)}
+ .adminUploadForm>input{max-width:none}
+ .adminFilePick{flex-wrap:wrap}
+ .adminFilePick small{margin-left:0}
+ .adminFormCols{grid-template-columns:minmax(0,1fr)}
+ .adminLoginCard{width:min(100%,420px);padding:28px 20px}
+ .adminNotice{margin-left:4%;margin-right:4%;overflow-wrap:anywhere}
+}
+@media(max-width:420px){
+ .hero{min-height:640px;padding-bottom:90px}
+ .hero h1{font-size:clamp(43px,11.5vw,54px)}
+ .actions{gap:15px}
+ .btn{max-width:100%;padding:0 16px}
+ .section h2,.homeAbout h2,.aboutPage h2{font-size:clamp(39px,10vw,50px)}
+ .bookingForm{padding:9px}
+ .formStep{grid-template-columns:22px minmax(0,1fr)}
+ .timeSlots{gap:5px}
+ .timeSlots button{padding:9px 10px}
+ .adminStats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .adminStat{padding:12px;min-height:110px}
+ .adminStat strong{font-size:21px;overflow-wrap:anywhere}
+ .adminWorkGrid{gap:8px}
+ .adminWorkCard footer{padding-left:8px;padding-right:8px}
+ .adminWorkCard footer button{padding:7px 6px}
+ .adminModal{padding:24px 16px}
+}
+@media(max-width:350px){
+ .adminTopbar h1{font-size:17px}
+ .adminEyebrow{font-size:8px;letter-spacing:1px}
+ .adminStats{grid-template-columns:minmax(0,1fr)}
+ .workGallery{grid-template-columns:minmax(0,1fr)}
+}
