@@ -1,16 +1,27 @@
-# YARO BARBERIA — Configuración del panel de administración
+# BARBERIA — налаштування адміністративної панелі YARO
 
-La interfaz de administración está disponible en `/#/admin` en GitHub Pages (o en `/admin` durante el desarrollo local). Utiliza Supabase Auth, políticas RLS de Postgres y Supabase Storage.
+Адміністративна панель доступна за адресою:
 
-## Configuración necesaria
+- GitHub Pages: [https://ulichigor.github.io/BARBERIA/#/admin](https://ulichigor.github.io/BARBERIA/#/admin)
+- Локальна розробка: `http://localhost:5173/admin`
 
-1. Crea un proyecto independiente de Supabase llamado **BARBERIA**. No utilices los proyectos Delivery ni Kitchen-shop.
-2. Ejecuta las migraciones en este orden:
+Панель використовує Supabase Auth, політики Row Level Security (RLS) у PostgreSQL та Supabase Storage.
+
+## 1. Створення Supabase
+
+1. Створіть окремий Supabase-проєкт з назвою **BARBERIA**.
+2. Не використовуйте проєкти Kitchen-shop або Feast Sushi / Delivery.
+3. Відкрийте **SQL Editor** і послідовно застосуйте міграції:
+
    - `supabase/migrations/202611240001_barberia_bookings.sql`
    - `supabase/migrations/202611270001_admin_panel.sql`
    - `supabase/migrations/202611270002_align_booking_timezone.sql`
-3. En Supabase Authentication, crea el usuario del barbero con correo electrónico y contraseña.
-4. Asigna el rol de administrador a ese usuario desde el editor SQL (sustituye el correo):
+
+## 2. Створення облікового запису майстра
+
+1. У Supabase відкрийте **Authentication → Users**.
+2. Створіть користувача майстра з його електронною поштою та паролем.
+3. У **SQL Editor** призначте цьому користувачу роль адміністратора. Замініть адресу електронної пошти на адресу створеного користувача:
 
 ```sql
 update auth.users
@@ -18,27 +29,62 @@ set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"ad
 where email = 'MASTER_EMAIL_HERE';
 ```
 
-5. Cierra sesión e inicia sesión de nuevo para que el JWT incluya el atributo seguro `app_metadata.role`.
-6. Copia la URL del proyecto y la clave publicable en el archivo `.env`:
+4. Вийдіть із панелі та увійдіть повторно, щоб новий JWT містив актуальний атрибут `app_metadata.role`.
+
+## 3. Змінні середовища
+
+Створіть у корені проєкту файл `.env`:
 
 ```env
 VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
-7. Instala las dependencias e inicia el servidor:
+Візьміть URL і publishable key у **Supabase → Project Settings → API**.
+
+Для локального запуску:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Para GitHub Pages, añade ambos valores como secretos de Actions con los nombres `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. La URL del panel publicado es `https://ulichigor.github.io/BARBERIA/#/admin`.
+## 4. Налаштування GitHub Pages
 
-## Seguridad
+1. Відкрийте репозиторій **UlichIgor/BARBERIA** на GitHub.
+2. Перейдіть до **Settings → Secrets and variables → Actions**.
+3. Створіть два repository secrets із точними назвами:
 
-- Nunca incluyas una clave `service_role` ni una clave secreta de Supabase en la aplicación React.
-- La autorización de administrador se valida mediante el atributo seguro `app_metadata.role` del JWT. Cambiar `user_metadata`, editable por el usuario, no concede permisos de administrador.
-- Los visitantes pueden enviar opiniones con estado `pending` y solo pueden leer las opiniones publicadas.
-- Los visitantes pueden consultar servicios activos y elementos publicados de la galería, pero no pueden acceder a los datos de citas/clientes ni administrar contenido.
-- Las reservas permanecen visibles únicamente para administradores. La política inicial solo permite insertar solicitudes con estado `pending`.
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+4. Додайте відповідні значення з Supabase.
+5. Переконайтеся, що GitHub Actions успішно завершив збірку та публікацію.
+
+## 5. Можливості панелі
+
+- Перегляд записів клієнтів і зміна статусу: очікує підтвердження, підтверджено, виконано, скасовано.
+- Пошук записів за ім’ям, телефоном або послугою.
+- Додавання, редагування та приховування послуг.
+- Керування цінами та тривалістю послуг.
+- Завантаження фотографій портфоліо (JPG, PNG, WEBP до 6 МБ).
+- Публікація, приховування та видалення робіт.
+- Модерація відгуків: публікація, приховування, повернення на модерацію та видалення.
+- Перегляд графіка: понеділок–п’ятниця, 09:00–19:00; субота й неділя — вихідні. Інтервал початку записів — 30 хвилин.
+
+## 6. Безпека — обов’язково
+
+- Ніколи не додавайте ключ `service_role` або секретний ключ Supabase у React, Vite, GitHub Pages чи будь-який клієнтський код.
+- У frontend дозволено використовувати лише publishable/anon key разом із правильно налаштованими RLS-політиками.
+- Роль адміністратора перевіряється за `app_metadata.role` у JWT. Не використовуйте `user_metadata` для надання адміністративних прав, оскільки користувач може змінювати ці дані самостійно.
+- Відвідувачі можуть надсилати відгуки зі статусом `pending`; на сайті відображаються лише опубліковані відгуки.
+- Публічним відвідувачам не можна відкривати доступ до персональних даних клієнтів або таблиці записів на читання.
+- Політики RLS мають дозволяти публічне створення лише заявок зі статусом `pending`, а перегляд і керування записами — тільки адміністратору.
+
+## 7. Якщо панель не відкривається
+
+- Перевірте, чи завершився workflow GitHub Actions без помилок.
+- Перевірте наявність обох секретів GitHub Actions.
+- Переконайтеся, що міграції застосовані в правильному порядку.
+- Переконайтеся, що користувачу призначено `app_metadata.role = admin`.
+- Після зміни ролі вийдіть із системи та авторизуйтеся повторно.
