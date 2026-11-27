@@ -6,7 +6,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const WORKING_DAYS = [1, 2, 3, 4, 5, 6]; // Monday–Saturday
 const OPEN_MINUTES = 9 * 60;
-const CLOSE_MINUTES = 20 * 60;
+const CLOSE_MINUTES = 19 * 60;
 const STEP_MINUTES = 30;
 const today = new Date();
 const localDate = (d) => {
@@ -97,7 +97,7 @@ export default function Booking() {
   async function submit(e) {
     e.preventDefault();
     setError('');
-    if (!dayIsOpen(date)) { setError('Запис доступний з понеділка по суботу.'); return; }
+    if (!dayIsOpen(date)) { setError('Запис доступний з понеділка по суботу, 09:00–19:00.'); return; }
     if (!time || !slots.includes(time)) { setError('Цей час уже недоступний. Обери інший слот.'); return; }
     const startMinutes = Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
     const booking = {
@@ -132,7 +132,7 @@ export default function Booking() {
           </button>)}</div></div></div>
         <div className="formStep"><b>02</b><div><h3><CalendarDays size={15} />　ОБЕРИ ДАТУ</h3>
           <input className="field" type="date" min={minDate} value={date} required onChange={e => { setDate(e.target.value); setTime(''); setSent(false); setError(''); }} />
-          <p className="hint">Графік майстра: понеділок — субота, 09:00–20:00. Неділя — вихідний.</p>
+          <p className="hint">Графік майстра: понеділок — субота, 09:00–19:00. Неділя — вихідний.</p>
           {date && !dayIsOpen(date) && <p className="formError">У цей день майстер не приймає. Обери дату з понеділка по суботу.</p>}
         </div></div>
         <div className="formStep"><b>03</b><div><h3>ДОСТУПНИЙ ЧАС</h3>
